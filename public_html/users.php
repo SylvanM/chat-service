@@ -45,7 +45,13 @@ function createUser() {
 
 function delete() {
 
-    
+    // gotta make sure they are a real person
+    if (!verify())
+        return false;
+
+    $sql = "DELETE FROM users WHERE username = '$username'";
+
+    run($sql);
 
 }
 
