@@ -35,7 +35,6 @@ $timestamp = $_GET['ts'];
 
 switch ($_GET['f']) {
     case ($ACTION_CREATEUSR):
-        echo "Creating user";
         createUser($username, $password);
     case ($ACTION_DELETEUSR):
         delete($username, $password);

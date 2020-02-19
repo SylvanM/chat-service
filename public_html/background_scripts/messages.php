@@ -23,7 +23,7 @@ function sendMessage($to, $from, $message, $password) {
     if (!verify($from, $password))
         return false;
 
-    enterPendingMessage($to, $fro, $message);
+    enterPendingMessage($to, $from, $message);
 
 }
 

@@ -100,7 +100,7 @@ function recordCount($sql) {
 
     $result = $conn->query($sql);
 
-    return is_object($result);
+    return $result->num_rows;
 }
 
 function getAllSQL($sql) {
