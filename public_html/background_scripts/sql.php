@@ -98,7 +98,9 @@ function recordCount($sql) {
         die("Connection failed: " . $conn->connect_error);
     } 
 
-    return $result->$num_rows;
+    $result = $conn->query($sql);
+
+    return is_object($result);
 }
 
 function getAllSQL($sql) {

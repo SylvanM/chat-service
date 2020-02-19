@@ -19,22 +19,14 @@ function verify($username, $password) {
 
 function userExists($user) {
     $sql = "SELECT from users where username = '$user'";
-    return recordCount($sql);
+    return recordCount($sql) == 1;
 }
 
 // Creates a user
 function createUser($username, $password) {
-
-    // make sure the user doesn't already exist
-    if (userExists($username))
-        return "User '$username' already exists";
-
     $check = hash("sha256", $password);
 
-
-    $sql = "INSERT INTO users (username, checkpass) VALUES ('$username', '$check')";
-
-    echo $sql;
+    $sql = "INSERT INTO users (username, checkpass, is_admin) VALUES ('$username', '$check', 0)";
 
     run($sql);
 
