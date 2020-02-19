@@ -31,7 +31,10 @@ function createUser($username, $password) {
 
     $check = hash("sha256", $password);
 
+
     $sql = "INSERT INTO users (username, checkpass) VALUES ('$username', '$check')";
+
+    echo $sql;
 
     run($sql);
 
