@@ -8,7 +8,15 @@ function enterPendingMessage($to, $from, $message) {
 
     $timestamp = time();
 
-    $sql = "INSERT into pending (to_user, from_user, message, timestamp) VALUES ('$to', '$from', '$message', '$timestamp')";
+    $id = hash("sha256", $to . $from . $message . $timestamp);
+
+    $to = "$to";
+    $from = "$from";
+    $message = "$message";
+    $timestamp = "$timestamp";
+    $id = "$id";
+
+    $sql = "INSERT into pending (to_user, from_user, message, timestamp, message_id) VALUES ('$to', '$from', '$message', '$timestamp', '$id')";
 
     run($sql);
 
@@ -28,18 +36,30 @@ function sendMessage($to, $from, $message, $password) {
 }
 
 // this is a HIGH LEVEL function which DOES check for authorization
-function acceptMessage($to, $from, $message, $timestamp, $adminname, $adminpassword) {
+function acceptMessage($identifier, $adminname, $adminpassword) {
 
     if (!verifyAdmin($adminname, $adminpassword))
         return false;
+    
+    $identifier = "$identifier";
 
-    $retrieveMessageSQL = "SELECT from pending where to_user = '$to' and from_user = '$from' and message = '$message' and timestamp = '$timestamp'";
-
-    $retrievedMessage = getSQLRow($retrieveMessageSQL);
+    $retrieveMessageSQL = "SELECT * from pending where message_id = '$identifier'";
+    echo $retrieveMessageSQL;
 
     // now move the pending message into the "messages" database
 
-    $removePendingMessageSQL = "DELETE from pending where to_user = '$to' and from_user = '$from' and message = '$message' and timestamp = '$timestamp'";
+    // get information from the message
+    $to         = getSQLResult($retrieveMessageSQL, "to_user"   );
+    $from       = getSQLResult($retrieveMessageSQL, "from_user" );
+    $message    = getSQLResult($retrieveMessageSQL, "message"   );
+    $timestamp  = getSQLResult($retrieveMessageSQL, "timestamp" );
+
+    $to         = "$to";
+    $from       = "$from";
+    $message    = "$message";
+    $timestamp  = "$timestamp";
+
+    $removePendingMessageSQL = "DELETE from pending where message_id = '$identifier'";
     run($removePendingMessageSQL);
 
     $addToMessagesSQL = "INSERT into messages (to_user, from_user, message, timestamp) VALUES ('$to', '$from', '$message', '$timestamp')";
@@ -47,12 +67,15 @@ function acceptMessage($to, $from, $message, $timestamp, $adminname, $adminpassw
 
 }
 
-function blockMessage($to, $from, $message, $timestamp, $adminname, $adminpassword) {
+function blockMessage($identifier, $adminname, $adminpassword) {
 
     if (!verifyAdmin($adminname, $adminpassword))
         return false;
 
-    $removePendingMessageSQL = "DELETE from pending where to_user = '$to' and from_user = '$from' and message = '$message' and timestamp = '$timestamp'";
+    $identifier = "$identifier";
+
+    $removePendingMessageSQL = "DELETE from pending where message_id = \"$identifier\"";
+    
     run($removePendingMessageSQL);
 
 }
@@ -67,7 +90,9 @@ function retrieveMessagesTo($user, $password) {
     if (!verify($user, $password))
         return false;
 
-    $sql = "SELECT from messages where to_user = '$user'";
+    $user = "$user";
+
+    $sql = "SELECT * FROM messages where to_user = \"$user\"";
 
     return json_encode(getAllSQL($sql));
 
@@ -77,7 +102,7 @@ function retrieveAllPendingMessages($adminname, $adminpassword) {
     if (!verifyAdmin($adminname, $adminpassword))
         return false;
 
-    $sql = "SELECT * from pending";
+    $sql = "SELECT * FROM `pending`";
 
     return json_encode(getAllSQL($sql));
 }
@@ -88,7 +113,9 @@ function retrieveMessagesFrom($user, $password) {
     if (!verify($user, $password))
         return false;
 
-    $sql = "SELECT from messages where from_user = '$user'";
+    $user = "$user";
+
+    $sql = "SELECT * FROM messages where from_user = \"$user\"";
 
     return json_encode(getAllSQL($sql));
 }

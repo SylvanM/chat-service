@@ -100,7 +100,11 @@ function recordCount($sql) {
 
     $result = $conn->query($sql);
 
-    return $result->num_rows;
+    if (!$result)
+        return 0;
+
+    return mysqli_num_rows($result);
+
 }
 
 function getAllSQL($sql) {
@@ -122,7 +126,12 @@ function getAllSQL($sql) {
 
     $result = $conn->query($sql);
 
-    return $result;
+    $rows = array();
+    while($r = mysqli_fetch_assoc($result)) {
+        $rows[] = $r;
+    }
+    return json_encode($rows);
+
 }
 
 ?>
